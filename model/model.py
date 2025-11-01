@@ -41,7 +41,7 @@ class Model(nn.Module):
         x_bwd, m_bwd = torch.flip(self.input_layer(x), dims=[1]), torch.flip(m, dims=[1])
         for gate, fwd, bwd in zip(self.gated_layers, self.fwd_layers, self.bwd_layers):
             x_spatio, x_temporal = gate(x_spatio, x_temporal)  # batch, length, node, hidden_dim
-            h_fwd = (x_spatio + x_temporal)[:, 0]  # Select the first time step as initial hidden state
+            h_fwd = (x_spatio + x_temporal)[:, 0]  # Select the first time step
             h_bwd = (x_spatio + x_temporal)[:, -1]
             x_fwd = fwd(x_fwd, m_fwd, h_fwd)
             x_bwd = bwd(x_bwd, m_bwd, h_bwd)

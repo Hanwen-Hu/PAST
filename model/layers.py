@@ -32,7 +32,7 @@ class EmbeddingLayer(nn.Module):
 
 class CrossGatedLayer(nn.Module):
     """Layer to perform cross-gating between spatial and temporal features."""
-    def __init__(self, hidden_dim: int, dropout: float=0.1) -> None:
+    def __init__(self, hidden_dim: int, dropout: float) -> None:
         super().__init__()
         self.gate_layer_s = nn.Linear(hidden_dim, hidden_dim)
         self.gate_layer_t = nn.Linear(hidden_dim, hidden_dim)
@@ -66,8 +66,8 @@ class TemporalGCNLayer(nn.Module):
         self.temporal_weight = nn.Parameter(torch.randn(1, seq_len, seq_len))
         self.ff = nn.Sequential(nn.Linear(hidden_dim, hidden_dim), nn.ReLU(),
                                 nn.Linear(hidden_dim, hidden_dim), nn.Dropout(dropout))
-        self.dropout = self._calc_drop_prob(alpha, dropout)     
-    
+        self.dropout = self._calc_drop_prob(alpha, dropout)
+
     def _calc_drop_prob(self, alpha: float, dropout: float) -> torch.Tensor:
         row = torch.arange(self.seq_len).reshape(-1, 1)
         col = torch.arange(self.seq_len).reshape(1, -1)

@@ -1,12 +1,9 @@
+"""PAST Model Trainer and Tester"""
+
 from argparse import Namespace
 from math import sqrt
 
-# import matplotlib
-# matplotlib.use('TkAgg')
-
-import numpy as np
 from tqdm import tqdm
-import matplotlib.pyplot as plt
 import torch
 from torch.utils.data import DataLoader
 
@@ -18,7 +15,7 @@ class PAST:
     """PAST Model Trainer and Tester"""
     def __init__(self, args: Namespace) -> None:
         self.args = args
-        self.path = f'files/normal/{args.dataset}_{(args.miss_rate * 10):.0f}_{args.miss_len}_{args.miss_span}.pth'
+        self.path = f'files/{args.dataset}_{(args.miss_rate * 10):.0f}_{args.miss_len}_{args.miss_span}.pth'
         print(f"Dataset: {args.dataset}\nRate: {args.miss_rate}\tLength: {args.miss_len}\tSpan: {args.miss_span}\t")
 
         train_config = TrafficDataConfig(args.dataset, args.seq_len, 'offline', args.miss_rate, args.miss_len, args.miss_span, args.device)
@@ -48,13 +45,13 @@ class PAST:
 
     def _train_epoch(self):
         train_loss, valid_loss = 0, 0
-        for x, _, m, t in tqdm(self.train_loader):  # tqdm
+        for x, _, m, t in tqdm(self.train_loader):
             # Validation Set
             x[~m] = 0
             if self.args.miss_len > 1:
                 index = torch.randperm(m.shape[0] * m.shape[2])
                 valid_m = torch.ones_like(self.valid_mask).bool()
-                valid_m[index[:index.shape[0] // 2]] = self.valid_mask[:index.shape[0] // 2]  # 抽取某些行进行mask
+                valid_m[index[:index.shape[0] // 2]] = self.valid_mask[:index.shape[0] // 2]
                 valid_m = valid_m[:m.shape[0] * m.shape[2]].reshape(m.shape[0], m.shape[2], m.shape[1], 1).permute(0, 2, 1, 3)
             else:
                 valid_m = torch.rand(m.shape, device=self.args.device) > 0.1
@@ -109,40 +106,5 @@ class PAST:
         content = f'{self.args.dataset},{self.args.miss_rate},{self.args.miss_len},{self.args.miss_span},Result: {offline_rmse:.4f},{offline_mae:.4f},{online_rmse:.4f},{online_mae:.4f}\n'
         with open('result.txt', 'a', encoding='utf-8') as file:
             file.write(content)
-        print(f"Dataset: {self.args.dataset}\nRate: {self.args.miss_rate}\tLength: {self.args.miss_len}\tSpan: {self.args.miss_span}")
+        print(f'Dataset: {self.args.dataset}\nRate: {self.args.miss_rate}\tLength: {self.args.miss_len}\tSpan: {self.args.miss_span}')
         print(f'Offline RMSE: {offline_rmse:.4f}\tOffline MAE: {offline_mae:.4f}\tOnline MSE: {online_rmse:.4f}\tOnline MAE: {online_mae:.4f}')
-
-    def visualize(self, index: int, node: int):
-        """Visualize the imputation results for a specific sample and node."""
-        self.model.load_state_dict(torch.load(self.path, map_location=self.args.device))
-        self.model.eval()
-        with torch.no_grad():
-            x, y, m, t = self.test_set[index]
-            x = x.unsqueeze(0).to(self.args.device)  # 1, length, node, dim
-            m = m.unsqueeze(0).to(self.args.device)  # 1, length, node, 1
-            t = t.unsqueeze(0).to(self.args.device)  # 1, length, node, dim
-            x[~m] = 0
-            x_hat, t_hat = self.model(x, m, t)
-            y_hat = x_hat + t_hat
-            x = x.cpu().numpy()[0, :, node, 0]
-            y = y.cpu().numpy()[:, node, 0]
-            m = m.cpu().numpy()[0, :, node, 0]
-            y_hat = y_hat.cpu().numpy()[0, :, node, 0]
-            x_hat = x_hat.cpu().numpy()[0, :, node, 0]
-
-        np.savetxt('all_imputation.txt', y_hat)
-        np.savetxt('observed.txt', x)
-        np.savetxt('mask.txt', m)
-        np.savetxt('ground_truth.txt', y)
-        np.savetxt('x_hat.txt', x_hat)
-        
-        y_hat = y_hat * (~m) + x * m
-        plt.figure(figsize=(12, 6))
-        plt.plot(y, label='Ground Truth', color='black')
-        plt.scatter(np.arange(len(y))[~m], y_hat[~m], label='Imputed Points', color='orange', zorder=5)
-        plt.scatter(np.arange(len(y))[m], x[m], label='Observed Points', color='blue', zorder=8, marker='x')
-        plt.title(f'Node {node} Imputation Visualization (Sample {index})')
-        plt.xlabel('Time Step')
-        plt.ylabel('Value')
-        plt.legend()
-        plt.savefig('visualization2.svg')

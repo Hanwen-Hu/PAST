@@ -18,12 +18,12 @@ def parse_args():
     parser.add_argument('-miss_span', type=int, default=1)
     # Experiment Setting
     parser.add_argument('-cuda_id', type=int, default=0)
-    parser.add_argument('-batch_size', type=int, default=16)
+    parser.add_argument('-batch_size', type=int, default=32)
     parser.add_argument('-epochs', type=int, default=50)
     parser.add_argument('-lr', type=float, default=0.005)
     parser.add_argument('-load', type=bool, default=False)
     # Model Setting
-    parser.add_argument('-hidden_dim', type=int, default=128)
+    parser.add_argument('-hidden_dim', type=int, default=64)
     parser.add_argument('-layer_num', type=int, default=3)
     parser.add_argument('-dropout', type=float, default=0.1)
     parser.add_argument('-alpha', type=float, default=0.1)
@@ -46,13 +46,5 @@ def main():
     model.test()
 
 
-def visual():
-    """Function to visualize the model's predictions."""
-    args = parse_args()
-    model = PAST(args)
-    node = 1  # Specify the node index to visualize
-    model.visualize(80, node)
-
-
 if __name__ == '__main__':
-    visual()
+    main()
