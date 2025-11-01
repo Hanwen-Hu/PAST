@@ -20,7 +20,7 @@ def parse_args():
     parser.add_argument('-cuda_id', type=int, default=0)
     parser.add_argument('-batch_size', type=int, default=32)
     parser.add_argument('-epochs', type=int, default=50)
-    parser.add_argument('-lr', type=float, default=0.005)
+    parser.add_argument('-lr', type=float, default=0.003)
     parser.add_argument('-load', type=bool, default=False)
     # Model Setting
     parser.add_argument('-hidden_dim', type=int, default=64)

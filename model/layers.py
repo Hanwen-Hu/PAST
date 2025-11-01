@@ -83,7 +83,7 @@ class TemporalGCNLayer(nn.Module):
         batch_node = m.shape[0]
         weight = self.temporal_weight * m  # 缺失位置不可达 batch * node, length, length
         if self.training:
-            drop_mask = torch.rand_like(self.dropout) > self.dropout
+            drop_mask = (torch.rand_like(self.dropout) > self.dropout).to(weight.device)
             weight = weight * drop_mask.unsqueeze(0)
         weight = torch.cat([self.hidden_weight.expand(batch_node, -1, -1), weight], dim=-1)
         return weight / (torch.sum(torch.abs(weight), dim=-1, keepdim=True) + 1e-6)
