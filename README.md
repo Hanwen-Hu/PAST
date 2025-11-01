@@ -1,2 +1,2 @@
 # PAST
-Primary-Auxiliary Spatio-Temporal Network for Traffic Time Series Imputation
+PAST: Primary-Auxiliary Spatio-Temporal Network for Traffic Time Series Imputation
