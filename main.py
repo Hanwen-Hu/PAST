@@ -1,4 +1,4 @@
-"""Main script to run the IEST model for training and testing."""
+"""Main script to run the PAST model for training and testing."""
 
 import argparse
 import torch
